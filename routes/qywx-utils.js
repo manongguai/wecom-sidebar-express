@@ -42,4 +42,40 @@ router.get('/signatures', async (ctx) => {
   }
 })
 
+// 获取应用签名，agentConfig 需要的 sign 字段
+router.get('/corpSignatures', async (ctx) => {
+  const {url} = ctx.request.query;
+
+  const [parsedUrl] = decodeURIComponent(url).split('#');
+
+  // 获取 js api ticket（包含 corp 和 app）
+  const {corpTicket, appTicket} = await QywxUtilsController.getJsApiTickets(parsedUrl, ctx.accessToken);
+
+  console.log('获取 ticket', corpTicket, appTicket);
+
+  // 生成签名
+  const signature = sign(corpTicket, nonceStr, timestamp, parsedUrl)
+  ctx.body = {
+    timestamp, nonceStr, signature
+  }
+})
+
+// 获取应用签名，agentConfig 需要的 sign 字段
+router.get('/agentSignatures', async (ctx) => {
+  const {url} = ctx.request.query;
+
+  const [parsedUrl] = decodeURIComponent(url).split('#');
+
+  // 获取 js api ticket（包含 corp 和 app）
+  const {corpTicket, appTicket} = await QywxUtilsController.getJsApiTickets(parsedUrl, ctx.accessToken);
+
+  console.log('获取 ticket', corpTicket, appTicket);
+
+  // 生成签名
+  const signature = sign(appTicket, nonceStr, timestamp, parsedUrl)
+  ctx.body = {
+    timestamp, nonceStr, signature
+  }
+})
+
 module.exports = router
